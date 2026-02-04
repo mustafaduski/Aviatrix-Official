@@ -2,33 +2,30 @@
 <html dir="rtl" lang="ku">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviatrix Official Pro</title>
+    <title>Aviatrix Pro - Fixed Balance</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
-        :root { --red: #ea1d5d; --bg: #0b0e11; --panel: #1e2329; }
+        :root { --red: #ea1d5d; --bg: #0b0e11; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        .header { padding: 15px; background: var(--panel); display: flex; justify-content: space-between; border-bottom: 2px solid var(--red); }
+        .header { padding: 15px; background: #1e2329; display: flex; justify-content: space-between; border-bottom: 2px solid var(--red); }
         .game-area { flex-grow: 1; position: relative; background: radial-gradient(circle, #1e2329, #0b0e11); overflow: hidden; }
-        /* گریدی جوڵاو */
-        .game-area::before { content: ""; position: absolute; width: 200%; height: 200%; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 50px 50px; z-index: 1; }
-        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: 900; color: #f0b90b; z-index: 10; text-shadow: 0 0 20px rgba(240, 185, 11, 0.4); }
-        #plane { position: absolute; font-size: 55px; z-index: 20; transform: translate(-50%, -50%); transition: 0.1s linear; filter: drop-shadow(0 0 10px var(--red)); }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
-        .controls { background: var(--panel); padding: 30px; border-radius: 35px 35px 0 0; text-align: center; z-index: 100; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); }
-        .btn { width: 90%; padding: 20px; font-size: 24px; font-weight: bold; border-radius: 15px; border: none; cursor: pointer; transition: 0.2s; }
-        .btn-bet { background: #22c55e; color: white; box-shadow: 0 5px 0 #168a42; }
-        .btn-cash { background: var(--red); color: white; display: none; box-shadow: 0 5px 0 #b0134a; }
-        input { padding: 15px; border-radius: 10px; border: 1px solid #444; background: #000; color: white; text-align: center; margin-bottom: 15px; width: 160px; font-size: 20px; }
+        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: 900; color: #f0b90b; z-index: 10; }
+        #plane { position: absolute; font-size: 45px; z-index: 20; transform: translate(-50%, -50%); transition: 0.1s linear; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .controls { background: #1e2329; padding: 25px; border-radius: 30px 30px 0 0; text-align: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+        .btn { width: 90%; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; }
+        .btn-bet { background: #22c55e; color: white; }
+        .btn-cashout { background: var(--red); color: white; display: none; }
+        input { padding: 12px; border-radius: 8px; border: 1px solid #444; background: #000; color: white; text-align: center; margin-bottom: 10px; width: 140px; font-size: 18px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-weight: 900; color: var(--red); font-size: 20px;">AVIATRIX</div>
-        <div style="color: #f0b90b; font-weight: bold;">💰 <span id="balance">0</span> IQD</div>
+        <div style="font-weight: 900; color: var(--red);">AVIATRIX</div>
+        <div id="balance-display">💰 <span id="balance">باردەکرێت...</span> IQD</div>
     </div>
 
     <div class="game-area" id="stage">
@@ -40,7 +37,7 @@
     <div class="controls">
         <input type="number" id="betInput" value="1000"> <br>
         <button id="betBtn" class="btn btn-bet" onclick="startGame()">BET (گرەوکردن)</button>
-        <button id="cashBtn" class="btn btn-cash" onclick="cashOut()">CASH OUT (وەرگرتنەوە)</button>
+        <button id="cashBtn" class="btn btn-cashout" onclick="cashOut()">CASH OUT</button>
     </div>
 
     <script>
@@ -62,9 +59,8 @@
         let gameLoop;
         let points = [];
         
-        // دەنگەکان
-        const crashSound = new Audio('https://www.soundjay.com/buttons/sounds/bomb-02.mp3');
-        const winSound = new Audio('https://www.soundjay.com/buttons/sounds/coin-01.mp3');
+        const crashSound = new Audio('https://www.myinstants.com/media/sounds/explosion.mp3');
+        const winSound = new Audio('https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3');
 
         const canvas = document.getElementById('graphCanvas');
         const ctx = canvas.getContext('2d');
@@ -80,7 +76,9 @@
             if (user) {
                 db.collection("wallets").doc(user.uid).onSnapshot(doc => {
                     if (doc.exists) {
-                        balance = Number(doc.data().balance);
+                        // لێرەدا کێشەی پارەکە چاک دەکەین
+                        let rawBalance = doc.data().balance;
+                        balance = Number(rawBalance); 
                         document.getElementById('balance').innerText = balance.toLocaleString();
                     }
                 });
@@ -88,25 +86,28 @@
         });
 
         function startGame() {
-            let bet = Number(document.getElementById('betInput').value);
-            if (bet > balance || bet < 100) { alert("باڵانست بەش ناکات!"); return; }
+            let betInput = document.getElementById('betInput');
+            let betAmt = Number(betInput.value);
+
+            if (isNaN(betAmt) || betAmt <= 0) { alert("بڕێکی ڕاست دابنێ!"); return; }
+            if (betAmt > balance) { alert("باڵانست بەش ناکات! باڵانسی تۆ: " + balance); return; }
             
-            balance -= bet;
+            balance -= betAmt;
             updateDB();
+            
             isPlaying = true;
             currentX = 1.00;
             points = [];
-            
             document.getElementById('betBtn').style.display = 'none';
             document.getElementById('cashBtn').style.display = 'inline-block';
             document.getElementById('multiplier').style.color = "#f0b90b";
 
-            let crashPoint = (Math.random() * 5 + 1.05).toFixed(2);
+            let crashPoint = (Math.random() * 4 + 1.1).toFixed(2);
 
             gameLoop = setInterval(() => {
                 currentX += 0.01;
                 document.getElementById('multiplier').innerText = currentX.toFixed(2) + "x";
-                
+
                 let x = (currentX - 1) * (canvas.width / 4);
                 let y = canvas.height - ((currentX - 1) * (canvas.height / 3.5)) - 80;
                 points.push({x, y});
@@ -114,10 +115,7 @@
                 ctx.clearRect(0,0, canvas.width, canvas.height);
                 ctx.beginPath();
                 ctx.strokeStyle = "#ea1d5d";
-                ctx.lineWidth = 7;
-                ctx.lineJoin = "round";
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = "#ea1d5d";
+                ctx.lineWidth = 6;
                 for(let i=0; i<points.length; i++) {
                     if(i===0) ctx.moveTo(points[i].x, points[i].y);
                     else ctx.lineTo(points[i].x, points[i].y);
@@ -138,8 +136,8 @@
         function cashOut() {
             if (!isPlaying) return;
             winSound.play();
-            let bet = Number(document.getElementById('betInput').value);
-            balance += Math.floor(bet * currentX);
+            let betAmt = Number(document.getElementById('betInput').value);
+            balance += Math.floor(betAmt * currentX);
             updateDB();
             stopGame("پیرۆزە! پارەکەت بردەوە 🚀", false);
         }
@@ -148,14 +146,16 @@
             clearInterval(gameLoop);
             isPlaying = false;
             if(crashed) document.getElementById('multiplier').style.color = "red";
-            setTimeout(() => { alert(msg); }, 150);
+            setTimeout(() => { alert(msg); }, 100);
             document.getElementById('betBtn').style.display = 'inline-block';
             document.getElementById('cashBtn').style.display = 'none';
         }
 
         function updateDB() {
             const user = auth.currentUser;
-            if (user) db.collection("wallets").doc(user.uid).update({ balance: balance });
+            if (user) {
+                db.collection("wallets").doc(user.uid).update({ balance: balance });
+            }
         }
     </script>
 </body>
