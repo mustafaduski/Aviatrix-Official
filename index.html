@@ -8,28 +8,37 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
-        body { margin: 0; background-color: #0f172a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .header { position: absolute; top: 0; width: 100%; padding: 20px; background: #1e293b; display: flex; justify-content: space-between; box-sizing: border-box; }
-        #multiplier { font-size: 80px; font-weight: bold; color: #f59e0b; margin-bottom: 20px; }
-        input { padding: 15px; border-radius: 10px; border: none; font-size: 20px; text-align: center; width: 200px; margin-bottom: 20px; }
-        .btn-bet { background-color: #22c55e; color: white; padding: 15px 60px; font-size: 22px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; }
-        #balance-display { color: #f59e0b; font-weight: bold; }
+        body { margin: 0; background: #0f172a; color: white; font-family: sans-serif; text-align: center; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        .header { padding: 20px; background: #1e293b; display: flex; justify-content: space-between; border-bottom: 2px solid #e91e63; }
+        .game-area { flex-grow: 1; position: relative; display: flex; justify-content: center; align-items: center; }
+        #multiplier { font-size: 80px; font-weight: bold; z-index: 10; transition: 0.1s; }
+        #plane { position: absolute; bottom: 20%; left: 10%; width: 100px; filter: drop-shadow(0 0 10px #e91e63); }
+        .controls { background: #1e293b; padding: 30px; border-top-left-radius: 25px; border-top-right-radius: 25px; }
+        .btn { padding: 15px 60px; font-size: 22px; font-weight: bold; cursor: pointer; border-radius: 12px; border: none; }
+        .btn-bet { background: #22c55e; color: white; }
+        .btn-cashout { background: #e91e63; color: white; display: none; }
+        input { padding: 12px; border-radius: 8px; border: none; text-align: center; font-size: 18px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div style="font-weight: bold; color: #e91e63;">AVIATRIX</div>
-        <div id="balance-display">باڵانس: <span id="balance">0</span> IQD</div>
+        <div id="balance-box">باڵانس: <span id="balance">0</span> IQD</div>
     </div>
 
-    <div id="multiplier">1.00x</div>
-    
-    <input type="number" id="bet-amount" value="1000">
-    <button class="btn-bet" onclick="startGame()">گرەوکردن (BET)</button>
+    <div class="game-area">
+        <div id="multiplier">1.00x</div>
+        <img id="plane" src="https://aviator-game.in/wp-content/uploads/2023/02/aviator-plane.png">
+    </div>
+
+    <div class="controls">
+        <input type="number" id="bet-amount" value="1000"> <br>
+        <button id="bet-btn" class="btn btn-bet" onclick="startGame()">گرەوکردن (BET)</button>
+        <button id="cashout-btn" class="btn btn-cashout" onclick="cashOut()">وەرگرتن (CASH OUT)</button>
+    </div>
 
     <script>
-        // لێرەدا کۆنفێگی فایەربەیسەکەی خۆت دابنێ (هەمان ئەوەی Kurdex)
         const firebaseConfig = {
             apiKey: "AIzaSyDCwv_kg1O3kiV4qkQjZnZHEWCrOMCH6W4",
             authDomain: "kurdex-pro-fa38c.firebaseapp.com",
@@ -43,6 +52,9 @@
         const auth = firebase.auth();
 
         let balance = 0;
+        let currentX = 1.00;
+        let gameActive = false;
+        let gameInterval;
 
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -52,13 +64,62 @@
                         document.getElementById('balance').innerText = balance;
                     }
                 });
-            } else {
-                console.log("User not logged in");
             }
         });
 
         function startGame() {
-            alert("یارییەکە دەستی پێکرد! ئێستا کۆدی جووڵەکە دادەنێین.");
+            let betValue = parseInt(document.getElementById('bet-amount').value);
+            if (betValue > balance) { alert("باڵانست بەش ناکات!"); return; }
+            
+            balance -= betValue;
+            updateBalanceInDB();
+            gameActive = true;
+            currentX = 1.00;
+            
+            document.getElementById('bet-btn').style.display = 'none';
+            document.getElementById('cashout-btn').style.display = 'block';
+            
+            let crashPoint = (Math.random() * 3.5 + 1.1).toFixed(2);
+            
+            gameInterval = setInterval(() => {
+                currentX += 0.01;
+                document.getElementById('multiplier').innerText = currentX.toFixed(2) + "x";
+                
+                let plane = document.getElementById('plane');
+                plane.style.left = (currentX * 7) + 5 + "%";
+                plane.style.bottom = (currentX * 5) + 15 + "%";
+
+                if (currentX >= crashPoint) { crash(); }
+            }, 100);
+        }
+
+        function cashOut() {
+            if (!gameActive) return;
+            let betValue = parseInt(document.getElementById('bet-amount').value);
+            balance += Math.floor(betValue * currentX);
+            updateBalanceInDB();
+            stopGame();
+            alert("پیرۆزە! پارەکەت وەرگرتەوە.");
+        }
+
+        function crash() {
+            stopGame();
+            document.getElementById('multiplier').style.color = "red";
+            alert("تەقییەوە! 💥");
+        }
+
+        function stopGame() {
+            clearInterval(gameInterval);
+            gameActive = false;
+            document.getElementById('bet-btn').style.display = 'inline-block';
+            document.getElementById('cashout-btn').style.display = 'none';
+            document.getElementById('plane').style.left = "10%";
+            document.getElementById('plane').style.bottom = "20%";
+        }
+
+        function updateBalanceInDB() {
+            const user = auth.currentUser;
+            if (user) { db.collection("wallets").doc(user.uid).update({ balance: balance }); }
         }
     </script>
 </body>
