@@ -8,28 +8,28 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
-        body { margin: 0; background: #0f172a; color: white; font-family: sans-serif; text-align: center; }
-        .header { padding: 20px; background: #1e293b; display: flex; justify-content: space-between; }
-        #multiplier { font-size: 60px; margin-top: 50px; font-weight: bold; }
-        .btn { padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 10px; border: none; margin-top: 20px; }
-        .btn-bet { background: #22c55e; color: white; }
+        body { margin: 0; background-color: #0f172a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .header { position: absolute; top: 0; width: 100%; padding: 20px; background: #1e293b; display: flex; justify-content: space-between; box-sizing: border-box; }
+        #multiplier { font-size: 80px; font-weight: bold; color: #f59e0b; margin-bottom: 20px; }
+        input { padding: 15px; border-radius: 10px; border: none; font-size: 20px; text-align: center; width: 200px; margin-bottom: 20px; }
+        .btn-bet { background-color: #22c55e; color: white; padding: 15px 60px; font-size: 22px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; }
+        #balance-display { color: #f59e0b; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>AVIATRIX</div>
+        <div style="font-weight: bold; color: #e91e63;">AVIATRIX</div>
         <div id="balance-display">باڵانس: <span id="balance">0</span> IQD</div>
     </div>
 
     <div id="multiplier">1.00x</div>
     
-    <input type="number" id="bet-amount" value="1000" style="margin-top:20px; padding:10px; border-radius:5px;">
-    <br>
-    <button class="btn btn-bet" onclick="startGame()">گرەوکردن (BET)</button>
+    <input type="number" id="bet-amount" value="1000">
+    <button class="btn-bet" onclick="startGame()">گرەوکردن (BET)</button>
 
     <script>
-        // لێرەدا نیشانەی کۆنفیگی فایەربەیسەکەی خۆت دابنێ
+        // لێرەدا کۆنفێگی فایەربەیسەکەی خۆت دابنێ (هەمان ئەوەی Kurdex)
         const firebaseConfig = {
             apiKey: "AIzaSyDCwv_kg1O3kiV4qkQjZnZHEWCrOMCH6W4",
             authDomain: "kurdex-pro-fa38c.firebaseapp.com",
@@ -53,13 +53,12 @@
                     }
                 });
             } else {
-                alert("تکایە لۆگین بکە");
+                console.log("User not logged in");
             }
         });
 
         function startGame() {
-            alert("یارییەکە دەستی پێکرد!");
-            // لێرە کۆدی جووڵەی فڕۆکەکە دادەنێین
+            alert("یارییەکە دەستی پێکرد! ئێستا کۆدی جووڵەکە دادەنێین.");
         }
     </script>
 </body>
