@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aviatrix Demo Mode</title>
+    <title>Aviatrix Demo Fixed</title>
     <style>
         :root { --red: #ff0044; --green: #00ff77; --bg: #0b0e11; --panel: #1e2329; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
@@ -11,14 +11,17 @@
         .balance-box { color: #f0b90b; font-weight: bold; font-size: 16px; border: 1px solid #f0b90b; padding: 5px 12px; border-radius: 8px; }
         .game-area { flex: 1; position: relative; background: radial-gradient(circle at bottom left, #1a1d23, #0b0e11); overflow: hidden; }
         #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(255, 0, 68, 0.5); }
-        #plane-container { position: absolute; z-index: 20; transition: 0.1s linear; pointer-events: none; }
-        #plane-img { width: 85px; filter: drop-shadow(0 0 10px var(--red)); }
-        .flame { position: absolute; right: -15px; top: 32px; width: 35px; height: 12px; background: linear-gradient(to left, transparent, #ffaa00, #ff0044); border-radius: 50%; filter: blur(3px); animation: flicker 0.1s infinite alternate; }
+        
+        /* گۆڕینی وێنە بۆ ئیمۆجی بۆ ئەوەی هەمیشە دیار بێت */
+        #plane-container { position: absolute; z-index: 20; font-size: 50px; transform: translate(-50%, -50%); pointer-events: none; }
+        
+        .flame { position: absolute; right: 10px; top: 25px; width: 30px; height: 10px; background: linear-gradient(to left, transparent, #ffaa00, #ff0044); border-radius: 50%; filter: blur(3px); animation: flicker 0.1s infinite alternate; z-index: -1; }
         @keyframes flicker { from { opacity: 0.6; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.6); } }
+        
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .controls { background: var(--panel); padding: 25px; display: flex; align-items: center; justify-content: center; gap: 15px; border-top: 1px solid #333; }
-        input { width: 110px; background: #000; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; }
-        .btn { padding: 15px 50px; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; flex: 1; max-width: 250px; }
+        input { width: 100px; background: #000; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; }
+        .btn { padding: 15px 40px; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; flex: 1; max-width: 250px; }
         .btn-bet { background: var(--green); color: #000; }
         .btn-cash { background: var(--red); color: white; display: none; }
     </style>
@@ -26,7 +29,7 @@
 <body>
 
 <div class="top-bar">
-    <div style="font-weight: 900; color: var(--red); font-size: 20px;">AVIATRIX DEMO</div>
+    <div style="font-weight: 900; color: var(--red); font-size: 20px;">AVIATRIX DEMO 🚀</div>
     <div class="balance-box">💰 <span id="balance">50,000</span> IQD</div>
 </div>
 
@@ -34,7 +37,7 @@
     <canvas id="graphCanvas"></canvas>
     <div id="multiplier">1.00x</div>
     <div id="plane-container" style="left: -100px; top: 80%;">
-        <img id="plane-img" src="https://aviator-game.in/wp-content/uploads/2023/02/aviator-plane.png">
+        ✈️
         <div class="flame"></div>
     </div>
 </div>
@@ -51,6 +54,7 @@
     let currentX = 1.00;
     let gameLoop;
     let points = [];
+    let crashAt = 0;
 
     const canvas = document.getElementById('graphCanvas');
     const ctx = canvas.getContext('2d');
@@ -63,40 +67,51 @@
     setup();
 
     function startGame() {
-        let betAmt = Number(document.getElementById('betInput').value);
+        if(isPlaying) return;
         
-        // لە وەشانی Demo سەیری باڵانس ناکەین بۆ ئەوەی هەمیشە ئیش بکات
+        let betAmt = Number(document.getElementById('betInput').value);
+        balance -= betAmt;
+        document.getElementById('balance').innerText = balance.toLocaleString();
+
         isPlaying = true;
         currentX = 1.00;
         points = [];
-        balance -= betAmt;
-        document.getElementById('balance').innerText = balance.toLocaleString();
         
+        // دیاریکردنی کاتی تەقینەوە و دڵنیابوونەوە لەوەی ژمارەیە
+        crashAt = parseFloat((Math.random() * 5 + 1.1).toFixed(2));
+
         document.getElementById('betBtn').style.display = 'none';
         document.getElementById('cashBtn').style.display = 'inline-block';
         document.getElementById('multiplier').style.color = "white";
 
-        let crashAt = (Math.random() * 8 + 1.1).toFixed(2);
-
         gameLoop = setInterval(() => {
             currentX += 0.01;
-            document.getElementById('multiplier').innerText = currentX.toFixed(2) + "x";
+            let displayX = currentX.toFixed(2);
+            document.getElementById('multiplier').innerText = displayX + "x";
             
+            // کێشانی هێڵەکە
             let x = (currentX - 1) * (canvas.width / 3.5);
             let y = canvas.height - ((currentX - 1) * (canvas.height / 3.2)) - 80;
             points.push({x, y});
 
             ctx.clearRect(0,0, canvas.width, canvas.height);
-            ctx.beginPath(); ctx.strokeStyle = "#ff0044"; ctx.lineWidth = 5;
+            ctx.beginPath(); 
+            ctx.strokeStyle = "#ff0044"; 
+            ctx.lineWidth = 5;
             for(let i=0; i<points.length; i++) {
                 i === 0 ? ctx.moveTo(points[i].x, points[i].y) : ctx.lineTo(points[i].x, points[i].y);
             }
             ctx.stroke();
 
+            // جوڵاندنی فڕۆکەکە
             let p = document.getElementById('plane-container');
-            p.style.left = x + "px"; p.style.top = y + "px";
+            p.style.left = x + "px"; 
+            p.style.top = y + "px";
 
-            if (currentX >= Number(crashAt)) { endRound(true); }
+            // مەرجی تەقینەوە - زۆر گرنگە
+            if (parseFloat(displayX) >= crashAt) {
+                endRound(true);
+            }
         }, 60);
     }
 
@@ -113,7 +128,7 @@
         isPlaying = false;
         if(crashed) {
             document.getElementById('multiplier').style.color = "red";
-            document.getElementById('multiplier').innerText += " CRASHED!";
+            document.getElementById('multiplier').innerText += " 💥";
         }
         document.getElementById('betBtn').style.display = 'inline-block';
         document.getElementById('cashBtn').style.display = 'none';
