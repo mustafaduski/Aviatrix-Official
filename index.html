@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aviatrix Mobile Pro</title>
+    <title>Aviatrix Official | وەشانی جێگیر</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -11,77 +11,71 @@
         :root { --red: #ff0044; --green: #00ff77; --bg: #0b0e11; --panel: #1e2329; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* هێدەر */
-        .top-bar { padding: 10px 15px; background: var(--panel); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; z-index: 100; }
-        .logo { font-weight: 900; color: var(--red); font-size: 18px; }
-        .balance-box { color: #f0b90b; font-weight: bold; font-size: 14px; }
+        .top-bar { padding: 10px 15px; background: var(--panel); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .balance-box { color: #f0b90b; font-weight: bold; font-size: 15px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px; }
 
         .main-wrapper { display: flex; flex: 1; overflow: hidden; position: relative; }
 
-        /* ناوچەی یاری */
+        /* یاری */
         .game-area { flex: 3; position: relative; background: radial-gradient(circle at bottom left, #1a1d23, #0b0e11); overflow: hidden; width: 100%; }
-        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(255, 0, 68, 0.5); }
+        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 65px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(255, 0, 68, 0.5); transition: 0.1s; }
         
-        #plane-container { position: absolute; z-index: 20; transition: 0.1s linear; }
-        #plane-img { width: 80px; filter: drop-shadow(0 0 10px var(--red)); }
+        #plane-container { position: absolute; z-index: 20; transition: 0.1s linear; pointer-events: none; }
+        #plane-img { width: 85px; filter: drop-shadow(0 0 10px var(--red)); }
         
-        .flame { position: absolute; right: -15px; top: 30px; width: 30px; height: 10px; background: linear-gradient(to left, transparent, #ffaa00, #ff0044); border-radius: 50%; filter: blur(3px); animation: flicker 0.1s infinite alternate; }
-        @keyframes flicker { from { opacity: 0.5; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.5); } }
+        .flame { position: absolute; right: -15px; top: 32px; width: 35px; height: 12px; background: linear-gradient(to left, transparent, #ffaa00, #ff0044); border-radius: 50%; filter: blur(3px); animation: flicker 0.1s infinite alternate; }
+        @keyframes flicker { from { opacity: 0.6; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.6); } }
 
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-        /* چات بۆ مۆبایل و کۆمپیوتەر */
-        .chat-sidebar { width: 280px; background: #161a1e; border-right: 1px solid #333; display: flex; flex-direction: column; transition: 0.3s; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; }
-        .msg { background: #1e2329; padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; border-right: 3px solid var(--red); }
+        /* چات */
+        .chat-sidebar { width: 280px; background: #161a1e; border-right: 1px solid #333; display: flex; flex-direction: column; transition: 0.3s; z-index: 500; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; }
+        .msg { background: #1e2329; padding: 8px; border-radius: 8px; margin-bottom: 8px; border-right: 3px solid var(--red); }
         .chat-input { padding: 10px; display: flex; gap: 5px; background: var(--panel); }
-        .chat-input input { flex: 1; background: #000; border: 1px solid #444; color: white; padding: 8px; border-radius: 5px; font-size: 12px; }
+        .chat-input input { flex: 1; background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; }
 
-        /* کۆنترۆڵەکان */
-        .controls { background: var(--panel); padding: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; border-top: 1px solid #333; z-index: 100; }
-        .bet-input-box { display: flex; flex-direction: column; align-items: center; }
-        input[type="number"] { width: 80px; background: #000; color: white; border: 1px solid #444; padding: 10px; border-radius: 8px; text-align: center; font-size: 16px; }
-        .btn { padding: 15px 40px; font-size: 18px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; flex: 1; max-width: 200px; }
-        .btn-bet { background: var(--green); color: #000; }
-        .btn-cash { background: var(--red); color: white; display: none; }
+        /* کۆنترۆڵ */
+        .controls { background: var(--panel); padding: 20px; display: flex; align-items: center; justify-content: center; gap: 15px; border-top: 1px solid #333; }
+        input[type="number"] { width: 100px; background: #000; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; }
+        .btn { padding: 15px 45px; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; flex: 1; max-width: 250px; transition: 0.2s; }
+        .btn-bet { background: var(--green); color: #000; box-shadow: 0 4px 0 #009944; }
+        .btn-cash { background: var(--red); color: white; display: none; box-shadow: 0 4px 0 #990022; }
 
-        /* ڕێکخستنی مۆبایل */
         @media (max-width: 768px) {
-            .chat-sidebar { 
-                position: absolute; left: -280px; top: 0; bottom: 0; z-index: 1000; 
-            }
+            .chat-sidebar { position: absolute; left: -280px; top: 0; bottom: 0; }
             .chat-sidebar.active { left: 0; }
-            #multiplier { font-size: 45px; }
-            #plane-img { width: 60px; }
-            .btn { padding: 12px 20px; font-size: 16px; }
+            #multiplier { font-size: 50px; }
+            #plane-img { width: 70px; }
+            .btn { padding: 14px 25px; font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
 <div class="top-bar">
-    <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:20px;">💬</button>
-    <div class="logo">AVIATRIX</div>
+    <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">💬</button>
+    <div style="font-weight: 900; color: var(--red); font-size: 20px;">AVIATRIX</div>
     <div class="balance-box">💰 <span id="balance">0</span> IQD</div>
 </div>
 
 <div class="main-wrapper">
     <div class="chat-sidebar" id="chatSidebar">
-        <div style="padding:10px; display:flex; justify-content:space-between; border-bottom:1px solid #333;">
+        <div style="padding:15px; font-weight:bold; border-bottom:1px solid #333; display:flex; justify-content:space-between;">
             <span>چاتی گشتی</span>
-            <button onclick="toggleChat()" style="background:none; border:none; color:var(--red);">X</button>
+            <button onclick="toggleChat()" style="background:none; border:none; color:var(--red); font-weight:bold;">X</button>
         </div>
         <div class="chat-messages" id="chatMsgs"></div>
         <div class="chat-input">
-            <input type="text" id="chatInp" placeholder="نامە...">
-            <button onclick="sendChat()" style="background:var(--red); border:none; color:white; padding:5px 10px; border-radius:5px;">ناردن</button>
+            <input type="text" id="chatInp" placeholder="نامەیەک بنووسە...">
+            <button onclick="sendChat()" style="background:var(--red); border:none; color:white; padding:10px; border-radius:5px;">ناردن</button>
         </div>
     </div>
 
     <div class="game-area" id="stage">
         <canvas id="graphCanvas"></canvas>
         <div id="multiplier">1.00x</div>
-        <div id="plane-container">
+        <div id="plane-container" style="left: -100px; top: 80%;">
             <img id="plane-img" src="https://aviator-game.in/wp-content/uploads/2023/02/aviator-plane.png">
             <div class="flame"></div>
         </div>
@@ -89,15 +83,12 @@
 </div>
 
 <div class="controls">
-    <div class="bet-input-box">
-        <input type="number" id="betInput" value="1000">
-    </div>
+    <input type="number" id="betInput" value="1000" min="100">
     <button id="betBtn" class="btn btn-bet" onclick="startGame()">BET</button>
     <button id="cashBtn" class="btn btn-cash" onclick="cashOut()">CASH OUT</button>
 </div>
 
 <script>
-    // کۆنفێگی فایەربەیس
     const firebaseConfig = {
         apiKey: "AIzaSyDCwv_kg1O3kiV4qkQjZnZHEWCrOMCH6W4",
         authDomain: "kurdex-pro-fa38c.firebaseapp.com",
@@ -121,10 +112,9 @@
     window.onresize = setup;
     setup();
 
-    function toggleChat() {
-        document.getElementById('chatSidebar').classList.toggle('active');
-    }
+    function toggleChat() { document.getElementById('chatSidebar').classList.toggle('active'); }
 
+    // چات
     function sendChat() {
         let txt = document.getElementById('chatInp').value;
         if(!txt || !auth.currentUser) return;
@@ -144,38 +134,46 @@
         });
     });
 
+    // باڵانس
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection("wallets").doc(user.uid).onSnapshot(doc => {
-                balance = Number(doc.data().balance);
-                document.getElementById('balance').innerText = balance.toLocaleString();
+                if (doc.exists) {
+                    balance = Number(doc.data().balance) || 0;
+                    document.getElementById('balance').innerText = balance.toLocaleString();
+                }
             });
         }
     });
 
     function startGame() {
-        let bet = Number(document.getElementById('betInput').value);
-        if (bet > balance || bet < 100) return alert("باڵانس یان بڕەکە هەڵەیە!");
+        let betAmt = Number(document.getElementById('betInput').value);
+        if (betAmt > balance || betAmt < 100) {
+            alert("باڵانست بەش ناکات یان بڕەکە هەڵەیە!");
+            return;
+        }
         
-        balance -= bet; updateDB();
+        balance = balance - betAmt;
+        updateDB();
+        
         isPlaying = true; currentX = 1.00; points = [];
-        
         document.getElementById('betBtn').style.display = 'none';
         document.getElementById('cashBtn').style.display = 'inline-block';
         document.getElementById('multiplier').style.color = "white";
 
-        let crashAt = (Math.random() * 5 + 1.1).toFixed(2);
+        let crashAt = (Math.random() * 5 + 1.05).toFixed(2);
 
         gameLoop = setInterval(() => {
             currentX += 0.01;
             document.getElementById('multiplier').innerText = currentX.toFixed(2) + "x";
             
             let x = (currentX - 1) * (canvas.width / 3.5);
-            let y = canvas.height - ((currentX - 1) * (canvas.height / 3)) - 80;
+            let y = canvas.height - ((currentX - 1) * (canvas.height / 3.2)) - 80;
             points.push({x, y});
 
             ctx.clearRect(0,0, canvas.width, canvas.height);
             ctx.beginPath(); ctx.strokeStyle = "#ff0044"; ctx.lineWidth = 4;
+            ctx.shadowBlur = 10; ctx.shadowColor = "#ff0044";
             for(let i=0; i<points.length; i++) {
                 i === 0 ? ctx.moveTo(points[i].x, points[i].y) : ctx.lineTo(points[i].x, points[i].y);
             }
@@ -184,14 +182,14 @@
             let p = document.getElementById('plane-container');
             p.style.left = x + "px"; p.style.top = y + "px";
 
-            if (currentX >= crashAt) { endRound(true); }
+            if (currentX >= Number(crashAt)) { endRound(true); }
         }, 65);
     }
 
     function cashOut() {
         if (!isPlaying) return;
-        let bet = Number(document.getElementById('betInput').value);
-        balance += Math.floor(bet * currentX);
+        let betAmt = Number(document.getElementById('betInput').value);
+        balance = balance + Math.floor(betAmt * currentX);
         updateDB();
         endRound(false);
     }
@@ -206,7 +204,7 @@
 
     function updateDB() {
         const user = auth.currentUser;
-        if (user) db.collection("wallets").doc(user.uid).update({ balance });
+        if (user) db.collection("wallets").doc(user.uid).update({ balance: Number(balance) });
     }
 </script>
 </body>
