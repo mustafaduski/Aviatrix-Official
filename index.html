@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aviatrix Pro | Real System</title>
+    <title>Aviatrix Pro | Yellow Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -16,11 +16,14 @@
         .balance-box { color: #f0b90b; font-weight: 900; font-size: 18px; }
 
         .game-container { flex: 1; position: relative; overflow: hidden; }
-        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(255, 0, 68, 0.5); }
+        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 75px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(255, 0, 68, 0.5); }
         
-        #plane-box { position: absolute; z-index: 20; font-size: 55px; transform: translate(-50%, -50%); pointer-events: none; }
-        .flame { position: absolute; right: 5px; top: 25px; width: 35px; height: 12px; background: linear-gradient(to left, transparent, #ffaa00, var(--red)); border-radius: 50%; filter: blur(4px); animation: flicker 0.1s infinite alternate; }
-        @keyframes flicker { from { opacity: 0.5; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.7); } }
+        /* ستایلی فڕۆکە زەردەکە */
+        #plane-box { position: absolute; z-index: 20; pointer-events: none; transition: 0.1s linear; }
+        #plane-img { width: 110px; filter: drop-shadow(0 0 8px rgba(255, 255, 0, 0.4)); }
+        
+        .flame { position: absolute; right: 15px; top: 55px; width: 45px; height: 12px; background: linear-gradient(to left, transparent, #ffaa00, var(--red)); border-radius: 50%; filter: blur(4px); animation: flicker 0.1s infinite alternate; z-index: -1; }
+        @keyframes flicker { from { opacity: 0.5; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.8); } }
 
         #graphCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
 
@@ -29,6 +32,8 @@
         .btn { padding: 15px 40px; font-size: 20px; font-weight: 900; border-radius: 12px; border: none; cursor: pointer; flex: 1; max-width: 250px; }
         .btn-bet { background: var(--green); color: #000; }
         .btn-cash { background: var(--red); color: white; display: none; }
+
+        @media (max-width: 768px) { #multiplier { font-size: 55px; } #plane-img { width: 85px; } .flame { top: 45px; width: 35px; } }
     </style>
 </head>
 <body>
@@ -36,15 +41,15 @@
 <canvas id="star-canvas"></canvas>
 
 <div class="top-bar">
-    <div style="font-weight: 900; color: var(--red);">AVIATRIX PRO</div>
+    <div style="font-weight: 900; color: var(--red);">AVIATRIX <span style="color:yellow">YELLOW</span></div>
     <div class="balance-box">💰 <span id="balance">0</span> IQD</div>
 </div>
 
 <div class="game-container" id="stage">
     <canvas id="graphCanvas"></canvas>
     <div id="multiplier">1.00x</div>
-    <div id="plane-box" style="left: -100px; top: 80%;">
-        ✈️
+    <div id="plane-box" style="left: -150px; top: 80%;">
+        <img id="plane-img" src="https://raw.githubusercontent.com/Mistafa-Mustafa/plane/main/image.png" onerror="this.src='https://aviator-game.in/wp-content/uploads/2023/02/aviator-plane.png'">
         <div class="flame"></div>
     </div>
 </div>
@@ -56,7 +61,6 @@
 </div>
 
 <script>
-    // 1. کۆنفێگی فایەربەیس
     const firebaseConfig = {
         apiKey: "AIzaSyDCwv_kg1O3kiV4qkQjZnZHEWCrOMCH6W4",
         authDomain: "kurdex-pro-fa38c.firebaseapp.com",
@@ -73,7 +77,7 @@
     const canvas = document.getElementById('graphCanvas');
     const ctx = canvas.getContext('2d');
 
-    // 2. باگراوندی ئەستێرەکان
+    // باگراوند
     const starCanvas = document.getElementById('star-canvas');
     const sCtx = starCanvas.getContext('2d');
     let stars = [];
@@ -100,7 +104,7 @@
     window.onresize = () => { setup(); initStars(); };
     setup();
 
-    // 3. سیستەمی باڵانس (زۆر گرنگ)
+    // سیستەمی پارە
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection("wallets").doc(user.uid).onSnapshot(doc => {
@@ -116,17 +120,16 @@
 
     function startGame() {
         if(isPlaying) return;
-        let betInput = document.getElementById('betInput');
-        let betAmt = parseInt(betInput.value);
+        let betAmt = parseInt(document.getElementById('betInput').value);
 
         if (isNaN(betAmt) || betAmt < 100) { alert("بڕەکە هەڵەیە!"); return; }
-        if (balance < betAmt) { alert("باڵانست بەش ناکات!"); return; }
+        if (balance < betAmt) { alert("باڵانست بەش ناکات یان بڕەکە هەڵەیە!"); return; }
 
         balance -= betAmt;
         updateDB();
 
         isPlaying = true; currentX = 1.00; points = [];
-        crashAt = parseFloat((Math.random() * 6 + 1.05).toFixed(2));
+        crashAt = parseFloat((Math.random() * 5 + 1.1).toFixed(2));
 
         document.getElementById('betBtn').style.display = 'none';
         document.getElementById('cashBtn').style.display = 'inline-block';
@@ -158,8 +161,7 @@
     function cashOut() {
         if (!isPlaying) return;
         let betAmt = parseInt(document.getElementById('betInput').value);
-        let winAmt = Math.floor(betAmt * currentX);
-        balance += winAmt;
+        balance += Math.floor(betAmt * currentX);
         updateDB();
         endRound(false);
     }
