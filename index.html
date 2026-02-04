@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ku">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviatrix | یاری فڕین و قازانج</title>
+    <style>
+        :root { --main: #e91e63; --dark: #0f172a; --gold: #f59e0b; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; overflow: hidden; }
+        .top-bar { display: flex; justify-content: space-between; padding: 15px; background: #1e293b; border-bottom: 2px solid var(--main); }
+        .balance { background: #000; padding: 5px 15px; border-radius: 20px; color: var(--gold); border: 1px solid var(--gold); }
+        .game-area { height: 65vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        #multiplier { font-size: 70px; font-weight: bold; z-index: 5; }
+        #plane { position: absolute; bottom: 20%; left: 10%; width: 80px; transition: 0.1s; }
+        .controls { height: 35vh; background: #1e293b; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 10px; }
+        input { width: 150px; padding: 10px; border-radius: 5px; border: none; text-align: center; font-size: 18px; }
+        .btn-bet { background: #22c55e; color: white; border: none; padding: 15px 50px; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; width: 250px; }
+        .btn-bet.active { background: var(--main); }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div style="font-weight: bold; color: var(--main);">AVIATRIX</div>
+        <div class="balance">💰 <span id="user-bal">5000</span> IQD</div>
+    </div>
+
+    <div class="game-area">
+        <div id="multiplier">1.00x</div>
+        <img id="plane" src="https://aviator-game.in/wp-content/uploads/2023/02/aviator-plane.png" alt="plane">
+    </div>
+
+    <div class="controls">
+        <input type="number" id="bet-amount" value="1000">
+        <button class="btn-bet" id="action-btn" onclick="handleAction()">BET (گرەوکردن)</button>
+        <div style="font-size: 12px; color: #94a3b8;">هەر کاتێک بردتەوە، بۆ وەرگرتنی پارەکە نامە بنێرە.</div>
+    </div>
+
+    <script>
+        let balance = 5000;
+        let isRunning = false;
+        let currentX = 1.00;
+        let interval;
+
+        function handleAction() {
+            const btn = document.getElementById('action-btn');
+            const bet = parseInt(document.getElementById('bet-amount').value);
+
+            if (!isRunning) {
+                if (bet > balance) { alert("باڵانست نییە!"); return; }
+                balance -= bet;
+                updateUI();
+                isRunning = true;
+                currentX = 1.00;
+                btn.innerText = "CASH OUT";
+                btn.classList.add('active');
+                startFlight();
+            } else {
+                let win = Math.floor(bet * currentX);
+                balance += win;
+                stopGame(`پیرۆزە! ${win} دینارت بردەوە 🥳`);
+            }
+        }
+
+        function startFlight() {
+            let crashPoint = (Math.random() * 4 + 1.1).toFixed(2);
+            interval = setInterval(() => {
+                currentX += 0.01;
+                document.getElementById('multiplier').innerText = currentX.toFixed(2) + "x";
+                
+                // جووڵەی فڕۆکە
+                let plane = document.getElementById('plane');
+                plane.style.left = (currentX * 5) + 5 + "%";
+                plane.style.bottom = (currentX * 4) + 15 + "%";
+
+                if (currentX >= crashPoint) {
+                    stopGame("تەقییەوە! (Crashed) 💥");
+                    document.getElementById('multiplier').style.color = "red";
+                }
+            }, 100);
+        }
+
+        function stopGame(msg) {
+            clearInterval(interval);
+            isRunning = false;
+            alert(msg);
+            const btn = document.getElementById('action-btn');
+            btn.innerText = "BET";
+            btn.classList.remove('active');
+            document.getElementById('multiplier').style.color = "white";
