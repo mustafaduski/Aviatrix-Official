@@ -3,36 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aviatrix Pro | Real Money System</title>
+    <title>Aviatrix Pro | Real System</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --red: #ff0044; --green: #00ff77; --bg: #05070a; --panel: #12161c; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* باگراوندی ئەستێرەکان */
         #star-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .top-bar { padding: 12px 20px; background: rgba(18, 22, 28, 0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; z-index: 10; }
+        .balance-box { color: #f0b90b; font-weight: 900; font-size: 18px; }
 
-        .top-bar { padding: 12px 20px; background: rgba(18, 22, 28, 0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; z-index: 10; }
-        .balance-box { color: #f0b90b; font-weight: 900; font-size: 18px; text-shadow: 0 0 10px rgba(240, 185, 11, 0.3); }
-
-        .game-container { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: 900; z-index: 10; transition: 0.1s; }
+        .game-container { flex: 1; position: relative; overflow: hidden; }
+        #multiplier { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(255, 0, 68, 0.5); }
         
-        #plane-box { position: absolute; z-index: 20; font-size: 60px; transform: translate(-50%, -50%); pointer-events: none; transition: 0.1s linear; }
-        .flame { position: absolute; right: 5px; top: 30px; width: 40px; height: 15px; background: linear-gradient(to left, transparent, #ffaa00, var(--red)); border-radius: 50%; filter: blur(4px); animation: flicker 0.1s infinite alternate; }
-        @keyframes flicker { from { opacity: 0.5; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.8); } }
+        #plane-box { position: absolute; z-index: 20; font-size: 55px; transform: translate(-50%, -50%); pointer-events: none; }
+        .flame { position: absolute; right: 5px; top: 25px; width: 35px; height: 12px; background: linear-gradient(to left, transparent, #ffaa00, var(--red)); border-radius: 50%; filter: blur(4px); animation: flicker 0.1s infinite alternate; }
+        @keyframes flicker { from { opacity: 0.5; transform: scaleX(1); } to { opacity: 1; transform: scaleX(1.7); } }
 
         #graphCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
 
-        .controls { background: var(--panel); padding: 30px 20px; display: flex; align-items: center; justify-content: center; gap: 15px; border-top: 1px solid #333; z-index: 10; }
-        input { width: 120px; background: #000; color: var(--green); border: 2px solid #333; padding: 15px; border-radius: 12px; text-align: center; font-size: 20px; font-weight: 900; }
-        .btn { padding: 18px 50px; font-size: 22px; font-weight: 900; border-radius: 15px; border: none; cursor: pointer; flex: 1; max-width: 300px; transition: 0.2s active; }
-        .btn-bet { background: var(--green); color: #000; box-shadow: 0 5px 0 #008844; }
-        .btn-cash { background: var(--red); color: white; display: none; box-shadow: 0 5px 0 #990022; }
-
-        @media (max-width: 768px) { #multiplier { font-size: 55px; } #plane-box { font-size: 45px; } }
+        .controls { background: var(--panel); padding: 25px; display: flex; align-items: center; justify-content: center; gap: 15px; border-top: 1px solid #333; z-index: 10; }
+        input { width: 110px; background: #000; color: var(--green); border: 2px solid #333; padding: 12px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; }
+        .btn { padding: 15px 40px; font-size: 20px; font-weight: 900; border-radius: 12px; border: none; cursor: pointer; flex: 1; max-width: 250px; }
+        .btn-bet { background: var(--green); color: #000; }
+        .btn-cash { background: var(--red); color: white; display: none; }
     </style>
 </head>
 <body>
@@ -40,7 +36,7 @@
 <canvas id="star-canvas"></canvas>
 
 <div class="top-bar">
-    <div style="font-weight: 900; color: var(--red); letter-spacing: 2px;">AVIATRIX <span style="color:white; font-size:10px;">REAL</span></div>
+    <div style="font-weight: 900; color: var(--red);">AVIATRIX PRO</div>
     <div class="balance-box">💰 <span id="balance">0</span> IQD</div>
 </div>
 
@@ -54,13 +50,13 @@
 </div>
 
 <div class="controls">
-    <input type="number" id="betInput" value="1000" step="1000">
+    <input type="number" id="betInput" value="1000" step="500">
     <button id="betBtn" class="btn btn-bet" onclick="startGame()">BET</button>
     <button id="cashBtn" class="btn btn-cash" onclick="cashOut()">CASH OUT</button>
 </div>
 
 <script>
-    // --- فایەربەیس ---
+    // 1. کۆنفێگی فایەربەیس
     const firebaseConfig = {
         apiKey: "AIzaSyDCwv_kg1O3kiV4qkQjZnZHEWCrOMCH6W4",
         authDomain: "kurdex-pro-fa38c.firebaseapp.com",
@@ -77,14 +73,14 @@
     const canvas = document.getElementById('graphCanvas');
     const ctx = canvas.getContext('2d');
 
-    // --- باگراوندی ئەستێرەکان ---
+    // 2. باگراوندی ئەستێرەکان
     const starCanvas = document.getElementById('star-canvas');
     const sCtx = starCanvas.getContext('2d');
     let stars = [];
     function initStars() {
-        starCanvas.width = window.innerWidth;
-        starCanvas.height = window.innerHeight;
-        for(let i=0; i<100; i++) stars.push({x: Math.random()*starCanvas.width, y: Math.random()*starCanvas.height, s: Math.random()*2});
+        starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight;
+        stars = [];
+        for(let i=0; i<80; i++) stars.push({x: Math.random()*starCanvas.width, y: Math.random()*starCanvas.height, s: Math.random()*2});
     }
     function drawStars() {
         sCtx.clearRect(0,0, starCanvas.width, starCanvas.height);
@@ -104,25 +100,28 @@
     window.onresize = () => { setup(); initStars(); };
     setup();
 
-    // --- وەرگرتنی باڵانس لە فایەربەیس ---
+    // 3. سیستەمی باڵانس (زۆر گرنگ)
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection("wallets").doc(user.uid).onSnapshot(doc => {
                 if (doc.exists) {
-                    balance = Number(doc.data().balance);
+                    balance = Number(doc.data().balance || 0);
                     document.getElementById('balance').innerText = balance.toLocaleString();
+                } else {
+                    db.collection("wallets").doc(user.uid).set({ balance: 5000 });
                 }
             });
         }
     });
 
     function startGame() {
-        let betAmt = parseInt(document.getElementById('betInput').value);
-        if (betAmt > balance || betAmt < 100) {
-            alert("باڵانست بەس نییە!"); return;
-        }
+        if(isPlaying) return;
+        let betInput = document.getElementById('betInput');
+        let betAmt = parseInt(betInput.value);
 
-        // کەمکردنەوەی پارەی ڕاستەقینە
+        if (isNaN(betAmt) || betAmt < 100) { alert("بڕەکە هەڵەیە!"); return; }
+        if (balance < betAmt) { alert("باڵانست بەش ناکات!"); return; }
+
         balance -= betAmt;
         updateDB();
 
@@ -143,8 +142,7 @@
             points.push({x, y});
 
             ctx.clearRect(0,0, canvas.width, canvas.height);
-            ctx.beginPath(); ctx.strokeStyle = "#ff0044"; ctx.lineWidth = 6;
-            ctx.shadowBlur = 15; ctx.shadowColor = "#ff0044";
+            ctx.beginPath(); ctx.strokeStyle = "#ff0044"; ctx.lineWidth = 5;
             for(let i=0; i<points.length; i++) {
                 i === 0 ? ctx.moveTo(points[i].x, points[i].y) : ctx.lineTo(points[i].x, points[i].y);
             }
@@ -161,8 +159,6 @@
         if (!isPlaying) return;
         let betAmt = parseInt(document.getElementById('betInput').value);
         let winAmt = Math.floor(betAmt * currentX);
-        
-        // زیادکردنی پارەی بردنەوە
         balance += winAmt;
         updateDB();
         endRound(false);
@@ -181,7 +177,7 @@
 
     function updateDB() {
         const user = auth.currentUser;
-        if (user) db.collection("wallets").doc(user.uid).update({ balance: Number(balance) });
+        if (user) db.collection("wallets").doc(user.uid).set({ balance: Number(balance) }, { merge: true });
     }
 </script>
 </body>
