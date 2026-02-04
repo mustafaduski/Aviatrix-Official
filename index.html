@@ -238,3 +238,35 @@
     </script>
 </body>
 </html>
+// بەستنەوەی یارییەکە بە فایەربەیس
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // خوێندنەوەی باڵانسی کڕیار لە داتابەیس
+        db.collection("wallets").doc(user.uid).onSnapshot(doc => {
+            if (doc.exists) {
+                balance = doc.data().balance;
+                updateUI();
+            } else {
+                // ئەگەر یەکەمجاری بوو، باڵانسەکەی بکە بە 0
+                db.collection("wallets").doc(user.uid).set({ balance: 0 });
+            }
+        });
+    } else {
+        // ئەگەر لۆگین نەبوو، ڕێگەی مەدە یاری بکات
+        alert("تکایە سەرەتا لۆگین بکە!");
+        window.location.href = "https://kurdex-official.vercel.app"; 
+    }
+});
+
+// گۆڕینی فەنکشنی stopGame بۆ ئەوەی باڵانسی نوێ لە داتابەیس سەیڤ بکات
+function saveBalanceToFirebase() {
+    const user = auth.currentUser;
+    if (user) {
+        db.collection("wallets").doc(user.uid).update({
+            balance: balance
+        });
+    }
+}
